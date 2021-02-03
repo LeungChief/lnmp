@@ -1,0 +1,185 @@
+FROM centos:7.9.2009
+ADD * /root/
+RUN set -x;\
+groupadd www;\
+useradd -g www www;\
+mkdir -p /web && mkdir -p /nginx_conf;\
+mv /root/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo;\
+yum clean all;\
+yum makecache;\
+yum update;\
+yum install -y make gcc gcc-c++ net-tools pcre-devel libxml2-devel openssl openssl-devel automake autoconf libtool  \
+libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel gd-devel gmp-devel readline-devel libpng libpng-devel libxml2 bzip2 bzip2-devel  \
+libxslt-devel expat-devel xmlrpc-c xmlrpc-c-devel epel-release libmcrypt libmcrypt-devel mcrypt mhash;\
+cd /root/nginx-1.18.0;\
+#安装NGINX
+./configure \
+--prefix=/usr/local/nginx_server \
+--sbin-path=/usr/local/nginx_server/sbin/nginx \--conf-path=/usr/local/nginx_server/nginx.conf \--error-log-path=/usr/local/nginx_server/log/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--pid-path=/var/run/nginx.pid \
+--lock-path=/var/run/nginx.lock \
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+--http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+--user=nginx \
+--group=www \
+--with-pcre \
+--with-http_v2_module \
+--with-http_ssl_module \
+--with-http_realip_module \
+--with-http_addition_module \
+--with-http_sub_module \
+--with-http_dav_module \
+--with-http_flv_module \
+--with-http_mp4_module \
+--with-http_gunzip_module \
+--with-http_gzip_static_module \
+--with-http_random_index_module \
+--with-http_secure_link_module \
+--with-http_stub_status_module \
+--with-http_auth_request_module \
+--with-mail \
+--with-mail_ssl_module \
+--with-file-aio \
+--with-ipv6 \
+--with-http_v2_module \
+--with-threads \
+--with-stream \
+--with-stream_ssl_module;\
+make && make install;\
+mkdir –p /var/cache/nginx;\
+cp /root/nginx.service /etc/systemd/system/nginx.service;\
+cp /root/nginx.service /etc/systemd/system/multi-user.target.wants/nginx.service;\
+cp /root/nginx.conf /usr/local/nginx_server/nginx.conf;\
+#PHP7.3
+cd /root/cmake-3.6.2;\
+./bootstrap;\
+gmake && gmake install;\
+ln -s /usr/local/bin/cmake /usr/bin/;\
+yum remove libzip-devel -y;\
+cd /root/libzip-1.5.1;\
+mkdir -p build && cd build;\
+cmake ..;\
+make && make install;\
+cp /root/ld.so.conf /etc/ld.so.conf;\
+ldconfig -v;\
+cd /root/php-7.3.24 \
+&& ./configure \
+--prefix=/usr/local/php_server/ \
+--with-config-file-path=/usr/local/php_server/config \
+--enable-fpm \
+--with-fpm-user=www  \
+--with-fpm-group=www \
+--enable-inline-optimization \
+--disable-debug \
+--disable-rpath \
+--enable-shared  \
+--enable-soap \
+--with-libxml-dir \
+--with-xmlrpc \
+--with-openssl \
+--with-mhash \
+--with-pcre-regex \
+--with-sqlite3 \
+--with-zlib \
+--enable-bcmath \
+--with-iconv \
+--with-bz2 \
+--enable-calendar \
+--with-curl \
+--with-cdb \
+--enable-dom \
+--enable-exif \
+--enable-fileinfo \
+--enable-filter \
+--with-pcre-dir \
+--enable-ftp \
+--with-gd \
+--with-openssl-dir \
+--with-jpeg-dir \
+--with-png-dir \
+--with-zlib-dir  \
+--with-freetype-dir \
+--enable-gd-jis-conv \
+--with-gettext \
+--with-gmp \
+--with-mhash \
+--enable-json \
+--enable-mbstring \
+--enable-mbregex \
+--enable-mbregex-backtrack \
+--with-libmbfl \
+--with-onig \
+--enable-pdo \
+--with-mysqli=mysqlnd \
+--with-pdo-mysql=mysqlnd \
+--with-zlib-dir \
+--with-pdo-sqlite \
+--with-readline \
+--enable-session \
+--enable-shmop \
+--enable-simplexml \
+--enable-sockets  \
+--enable-sysvmsg \
+--enable-sysvsem \
+--enable-sysvshm \
+--enable-wddx \
+--with-libxml-dir \
+--with-xsl \
+--enable-zip \
+--enable-mysqlnd-compression-support \
+--with-pear \
+--enable-opcache;\
+make && make install;\
+mkdir -p /usr/local/php_server/config && mkdir -p /usr/local/php_server/config/init.d;\
+cp php.ini-production /usr/local/php_server/config/php.ini;\
+cp /usr/local/php_server/etc/php-fpm.conf.default /usr/local/php_server/etc/php-fpm.conf;\
+cp /usr/local/php_server/etc/php-fpm.d/www.conf.default /usr/local/php_server/etc/php-fpm.d/www.conf;\
+cp sapi/fpm/init.d.php-fpm /usr/local/php_server/config/init.d/php-fpm;\
+chmod +x /usr/local/php_server/config/init.d/php-fpm;\
+cp /root/php-fpm.service /etc/systemd/system/php-fpm.service;\
+ln -s /etc/systemd/system/php-fpm.service /etc/systemd/system/multi-user.target.wants/php-fpm.service;\
+#cp /usr/local/php_server/bin/php /usr/local/bin/php && cp /usr/local/php_server/bin/phpize /usr/local/bin/phpize;\
+#安装swoole
+cd /root/swoole-src-4.6.1;\
+/usr/local/php_server/bin/phpize;\
+./configure --with-php-config=/usr/local/php_server/bin/php-config --enable-sockets --enable-http2 --enable-openssl --enable-mysqlnd;\
+make;\
+make install;\
+#/usr/local/php_server/bin/pecl install swoole;\
+#安装redis
+cd /root/redis-4.0.6;\
+mkdir -p /etc/redis && cp /root/redis.conf /etc/redis/redis.conf;\
+make MALLOC=libc;\
+make install;\
+cp /root/redis.service /etc/systemd/system/redis.service;\
+cp /root/redis.service /etc/systemd/system/multi-user.target.wants/redis.service;\
+#安装phpredis
+cd /root/phpredis-4.2.0;\
+/usr/local/php_server/bin/phpize;\
+./configure --with-php-config=/usr/local/php_server/bin/php-config;\
+make && make install;\
+#复制配置好.so文件的ini文件
+cp /root/php.ini /usr/local/php_server/config/php.ini;\
+#安装Mysql8
+cd /root;\
+yum install -y mysql-community-{client,common,devel,embedded,libs,server}-*;\
+cp /root/my.cnf /etc/my.cnf;\
+systemctl enable mysqld;\
+rm -rf /root/*
+
+ENV PATH $PATH:/usr/local/nginx_server/sbin;/usr/local/php_server/bin
+
+VOLUME ["/nginx_conf","/www","/mysql_data"]
+
+CMD ["/usr/sbin/init"]
+
+
+
+
+
+
+

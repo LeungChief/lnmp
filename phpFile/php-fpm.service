@@ -1,0 +1,13 @@
+[Unit]    
+Description=php73-fpm    
+After=network.target    
+     
+[Service]    
+Type=forking    
+ExecStart=/usr/local/php_server/sbin/php-fpm   
+ExecReload=/usr/local/php_server/sbin/php-fpm -s reload    
+ExecStop=/usr/local/php_server/sbin/php-fpm -s stop  
+PrivateTmp=true    
+     
+[Install]    
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+#描述信息
+Description=Redis Server 4.0.6
+After=network.target
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/redis-server /etc/redis/redis.conf --daemonize yes  
+ExecStop=/usr/local/bin/redis-cli -h 127.0.0.1 -p 6379 shutdown 
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target #字符界面下启动
