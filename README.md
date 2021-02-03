@@ -5,7 +5,7 @@
 4. redis4.0.6
 5. swoole 4.6.1
 
-#### mysql8.0软件包使用wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.18-1.el7.x86_64.rpm-bundle.tar自行下载
+#### mysql8.0软件包使用wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.18-1.el7.x86_64.rpm-bundle.tar 自行下载
 
 ## 使用说明
 #### 1. 拉取镜像
