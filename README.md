@@ -1,9 +1,11 @@
 ## 软件版本说明
 1. nginx1.18.0 stable version
 2. php7.3.24
-3. mysql8.0 MySQL Community Server - GPL
+3. mysql8.0 MySQL Community Server - GPL 
 4. redis4.0.6
 5. swoole 4.6.1
+
+#### mysql8.0软件包使用wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.18-1.el7.x86_64.rpm-bundle.tar自行下载
 
 ## 使用说明
 #### 1. 拉取镜像
